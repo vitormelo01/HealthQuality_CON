@@ -717,5 +717,23 @@ merge 1:m id using HeartMortReadm_Complete.dta
 drop _merge
 
 gen pop_density = pop/landarea
-
+drop lamndarea
+drop pop
+drop top001_adj top01_adj top05_adj top5_adj
 save HeartMortReadm_Complete, replace
+
+* ------------------------------------------------------------------------------
+* Adding Labels to variables 
+* ------------------------------------------------------------------------------
+
+label variable mort_heart_attack "Heart Attack Mortality Rates"
+label variable mort_heart_failure "Heart Failure Mortality Rates"
+label variable readm_heart_attack "Heart Attack Readmission Rates"
+label variable readm_heart_failure "Heart Failure Readmission Rates"
+label variable mort_CABG "CABG Mortality Rates"
+label variable readm_CABG "CABG Readmission Rates"
+label variable id "State FIPs Code"
+label variable unemp_rate "Unemployment Rate"
+label variable income_pcp_adj "Income per Capita"
+label variable pop_density "Population Density"
+
