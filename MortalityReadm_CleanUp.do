@@ -1,7 +1,13 @@
 * Mortality and Readmissions data clean up
 
 clear
-cd "D:\OneDrive\HealthQuality_Resources\Data"
+
+* Setting Env Variables
+global directory: env HealthQualityDirectory
+
+cd "$directory"
+
+*cd "D:\OneDrive\HealthQuality_Resources\Data"
 *-------------
 *2016 Clean Up
 *-------------
