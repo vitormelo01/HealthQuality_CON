@@ -731,6 +731,8 @@ save HeartMortReadm_Complete, replace
 * ------------------------------------------------------------------------------
 * Adding Labels to variables 
 * ------------------------------------------------------------------------------
+clear
+use HeartMortReadm_Complete.dta
 
 label variable mort_heart_attack "Heart Attack Mortality Rates"
 label variable mort_heart_failure "Heart Failure Mortality Rates"
@@ -742,4 +744,107 @@ label variable id "State FIPs Code"
 label variable unemp_rate "Unemployment Rate"
 label variable income_pcp_adj "Income per Capita"
 label variable pop_density "Population Density"
+
+save HeartMortReadm_Complete, replace
+
+* ------------------------------------------------------------------------------
+* Loading, cleaning, and merging CON data
+* ------------------------------------------------------------------------------
+clear
+insheet using "CON_Index.csv"
+
+{
+	gen id = .
+	rename statename state
+replace id = 1 if state=="Alabama"
+replace id = 2 if state=="Alaska"
+replace id = 4 if state=="Arizona"
+replace id = 5 if state=="Arkansas"
+replace id = 6 if state=="California"
+replace id = 8 if state=="Colorado"
+replace id = 9 if state=="Connecticut"
+replace id = 10 if state=="Delaware"
+replace id = 11 if state=="District of Columbia"
+replace id = 12 if state=="Florida"
+replace id = 13 if state=="Georgia"
+replace id = 15 if state=="Hawaii"
+replace id = 16 if state=="Idaho"
+replace id = 17 if state=="Illinois"
+replace id = 18 if state=="Indiana"
+replace id = 19 if state=="Iowa"
+replace id = 20 if state=="Kansas"
+replace id = 21 if state=="Kentucky"
+replace id = 22 if state=="Louisiana"
+replace id = 23 if state=="Maine"
+replace id = 24 if state=="Maryland"
+replace id = 25 if state=="Massachusetts"
+replace id = 26 if state=="Michigan"
+replace id = 27 if state=="Minnesota"
+replace id = 28 if state=="Mississippi"
+replace id = 29 if state=="Missouri"
+replace id = 30 if state=="Montana"
+replace id = 31 if state=="Nebraska"
+replace id = 32 if state=="Nevada"
+replace id = 33 if state=="New Hampshire"
+replace id = 34 if state=="New Jersey"
+replace id = 35 if state=="New Mexico"
+replace id = 36 if state=="New York"
+replace id = 37 if state=="North Carolina"
+replace id = 38 if state=="North Dakota"
+replace id = 39 if state=="Ohio"
+replace id = 40 if state=="Oklahoma"
+replace id = 41 if state=="Oregon"
+replace id = 42 if state=="Pennsylvania"
+replace id = 44 if state=="Rhode Island"
+replace id = 45 if state=="South Carolina"
+replace id = 46 if state=="South Dakota"
+replace id = 47 if state=="Tennessee"
+replace id = 48 if state=="Texas"
+replace id = 49 if state=="Utah"
+replace id = 50 if state=="Vermont"
+replace id = 51 if state=="Virginia"
+replace id = 53 if state=="Washington"
+replace id = 54 if state=="West Virginia"
+replace id = 55 if state=="Wisconsin"
+replace id = 56 if state=="Wyoming"
+}
+
+keep year id state ahpaopenheart ahpacardiaccath 
+rename ahpaopenheart openheart_con
+rename ahpacardiaccath cardiaccath_con
+
+sort id year
+
+
+*Filling in year of missing variables
+xtset id year
+tsfill, full
+
+replace openheart_con = openheart_con[_n-1] if missing(openheart_con)
+replace cardiaccath_con = cardiaccath_con[_n-1] if missing(cardiaccath_con)
+drop state
+
+save CON_Index, replace
+
+
+merge 1:m year id using HeartMortReadm_Complete.dta
+
+drop if _merge==1
+drop _merge
+
+save mortality_fulldata, replace
+* ------------------------------------------------------------------------------
+* Regressions
+* ------------------------------------------------------------------------------ 
+
+xtset providerid year
+
+global controls "income_pcp_adj pop_density unemp_rate top1_adj gini"
+
+xtreg mort_heart_failure openheart_con $controls i.year, fe vce(cluster id)
+xtreg readm_heart_failure openheart_con $controls i.year, fe vce(cluster id)
+
+
+
+
 
