@@ -2,10 +2,7 @@
 
 clear
 
-* Setting Env Variables
-global directory: env HealthQualityDirectory
-
-cd "$directory"
+cd "C:\Users\vitor\OneDrive\Research_Resources\HealthQuality_Resources\Data"
 
 *cd "D:\OneDrive\HealthQuality_Resources\Data"
 *-------------
@@ -833,13 +830,28 @@ drop if _merge==1
 drop _merge
 
 save mortality_fulldata, replace
+
+* ------------------------------------------------------------------------------
+* Adding final demographic controls
+* ------------------------------------------------------------------------------
+
+use mortality_fulldata.dta, clear 
+
+rename id state
+merge m:1 state year using ASEC_1980-2020_State.dta
+
+rename state id
+
+drop if _merge==2
+drop _merge
+
 * ------------------------------------------------------------------------------
 * Regressions
 * ------------------------------------------------------------------------------ 
 
 xtset providerid year
 
-global controls "income_pcp_adj pop_density unemp_rate top1_adj gini"
+global controls "income_pcp_adj pop_density unemp_rate top1_adj gini prop_age_25to45_bsy prop_age_45to65_bsy prop_age_over65_bsy prop_bach_degree_bsy prop_male_bsy prop_married_bsy prop_white_bsy"
 
 xtreg mort_heart_failure openheart_con $controls i.year, fe vce(cluster id)
 xtreg readm_heart_failure openheart_con $controls i.year, fe vce(cluster id)
