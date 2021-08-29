@@ -2,7 +2,7 @@
 
 clear
 
-cd "C:\Users\vitor\OneDrive\Research_Resources\HealthQuality_Resources\Data"
+cd "D:\OneDrive\Research_Resources\HealthQuality_Resources\Data"
 
 *cd "D:\OneDrive\HealthQuality_Resources\Data"
 *-------------
@@ -846,16 +846,52 @@ drop if _merge==2
 drop _merge
 
 * ------------------------------------------------------------------------------
-* Regressions
+* Analysis
 * ------------------------------------------------------------------------------ 
 
 xtset providerid year
 
+*Setting Global for controls
 global controls "income_pcp_adj pop_density unemp_rate top1_adj gini prop_age_25to45_bsy prop_age_45to65_bsy prop_age_over65_bsy prop_bach_degree_bsy prop_male_bsy prop_married_bsy prop_white_bsy"
 
-xtreg mort_heart_failure openheart_con $controls i.year, fe vce(cluster id)
-xtreg readm_heart_failure openheart_con $controls i.year, fe vce(cluster id)
+*Labeling Variables
+label variable mort_heart_failure "Mortality Rate (Risk Adjusted)"
+label variable readm_heart_failure "Readmissions Rate (Risk Adjusted)"
+label variable openheart_con "Open Heart Surgery CON"
+label variable income_pcp_adj "Income per Capita"
+label variable pop_density "Population Density"
+label variable unemp_rate "Unemployment Rate"
+label variable top1_adj "Income Shares of Top 1%"
+label variable gini "Gini Coefficient"
+label variable prop_age_25to45_bsy "Share of Population age 25-45"
+label variable prop_age_45to65_bsy "Share of Population age 45-65"
+label variable prop_age_over65_bsy "Share of Population over age 65"
+label variable prop_bach_degree_bsy "Share of Population with Bachelor's Degree"
+label variable prop_male_bsy "Share of Population Male"
+label variable prop_married_bsy "Share of Population Married"
+label variable prop_white_bsy "Share of Population White"
 
+*-------------------------------------------------------------------------------
+* Sum of Descriptive Statistics 
+* ------------------------------------------------------------------------------
+sum mort_heart_failure readm_heart_failure openheart_con $controls
+	asdoc sum mort_heart_failure readm_heart_failure openheart_con $controls, label replace
+
+*-------------------------------------------------------------------------------
+* Regression Analaysis with Fixed Effects
+* ------------------------------------------------------------------------------
+
+*Mortality Rates analysis
+xtreg mort_heart_failure openheart_con i.year, fe vce(cluster id)
+	outreg2 using Mortality_OpenHeartCON, replace word label keep(openheart_con) addtext(State FE, YES, Year FE, YES) title(Table 1)
+xtreg mort_heart_failure openheart_con $controls i.year, fe vce(cluster id)
+	outreg2 using Mortality_OpenHeartCON, append word label keep(openheart_con $controls) addtext(State FE, YES, Year FE, YES) title(Table 1)
+
+*Readmission Rates Analysis
+xtreg readm_heart_failure openheart_con i.year, fe vce(cluster id)
+	outreg2 using Readmissions_OpenHeartCON, replace word label keep(openheart_con) addtext(State FE, YES, Year FE, YES) title(Table 2)
+xtreg readm_heart_failure openheart_con $controls i.year, fe vce(cluster id)
+	outreg2 using Readmissions_OpenHeartCON, append word label keep(openheart_con $controls) addtext(State FE, YES, Year FE, YES) title(Table 2)
 
 
 
